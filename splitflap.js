@@ -176,12 +176,8 @@ SFD.SegmentGroup = function(config) {
 
     function _setText(text) {
 		for( var j = 0; j < _config.numberOfSegments; j++ ) {
-            if (j < text.length) {
-                var val = text[ j ];
-                _segments[ j ].setCharacter( val );
-            } else {
-                _segments[ j ].setCharacter(' ');
-            }
+            var ch = (j < text.length) ? text[j] : ' ';
+            _segments[ j ].setCharacter(ch);
 		}
     }
 
