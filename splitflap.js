@@ -41,10 +41,10 @@ SFD.Segment = function(config) {
         _flap.className = 'sfd_segment_flap';
         _halfTop.className = 'sfd_half_top';
         _halfBottom.className = 'sfd_half_bottom';
-        _div.appendChild(_flap);
-        _flap.appendChild(_flapContent);
         _div.appendChild(_halfTop);
         _div.appendChild(_halfBottom);
+        _div.appendChild(_flap);
+        _flap.appendChild(_flapContent);
         _config.parent.appendChild(_div);
 
         _update();
