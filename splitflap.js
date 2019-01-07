@@ -209,6 +209,6 @@ SFD.SegmentGroup = function(config) {
 };
 
 SFD.Flaps = {
-    Alpha: [' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
-    Digits: ['1','2','3','4','5','6','7','8','9','0']
+    Alpha: ' ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+    Digits: '0123456789'.split('')
 };
