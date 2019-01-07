@@ -5,6 +5,7 @@ This code was influenced by: Jaume Sanchez Elias's https://github.com/spite/Sola
 var SFD = SFD || {};
 
 /*
+    config.size = {width:, height:}
     config.flaps = ['A', 'B', ...];
     config.parent = ... a div or other element
 */
@@ -38,9 +39,15 @@ SFD.Segment = function(config) {
         _target = _valueTop = _valueBottom = _config.flaps[0];
 
         _div.className = 'sfd_segment';
+        _div.style.width = _config.size.width + 'px';
+        _div.style.height = _config.size.height + 'px';
+
         _flap.className = 'sfd_segment_flap';
         _halfTop.className = 'sfd_half_top';
+        _halfTop.style.lineHeight = _config.size.height + 'px';
+
         _halfBottom.className = 'sfd_half_bottom';
+        _halfBottom.style.lineHeight = '0px';
         _div.appendChild(_halfTop);
         _div.appendChild(_halfBottom);
         _div.appendChild(_flap);
@@ -116,7 +123,7 @@ SFD.Segment = function(config) {
                 'rotateX(' + (-(_fallFrom - _angle)) + 'deg) '+
                 '';
             _flapContent.style.transform = '';
-            _flapContent.style.lineHeight = '120px';
+            _flapContent.style.lineHeight = _config.size.height + 'px';
         } else {
             _flap.style.transform = 
                 'translateZ(0.1px) ' +
@@ -141,6 +148,8 @@ SFD.Segment = function(config) {
 
 /*
     config.numberOfSegments
+    config.flaps = ['A', 'B', ...]
+    config.geometry.segmentWidth, segmentHeight
 */
 SFD.SegmentGroup = function(config) {
 
@@ -154,12 +163,14 @@ SFD.SegmentGroup = function(config) {
             var segment = new SFD.Segment({
                 index: j,
                 parent: _div,
-                flaps: _config.flaps
+                flaps: _config.flaps,
+                size: {width: _config.geometry.segmentWidth, height: _config.geometry.segmentHeight}
             });
             _segments.push(segment);
         }
 
         _config.parent.appendChild(_div);
+
         _update();
     }
 
@@ -181,11 +192,19 @@ SFD.SegmentGroup = function(config) {
 		}
     }
 
+    function _getSize() {
+        return {
+            width: _segments.length * _config.geometry.segmentWidth + _segments.length * 5,
+            height: _config.geometry.segmentHeight
+        };
+    }
+
     _init();
 
     return {
         setText: _setText,
-        update: _update
+        update: _update,
+        getSize: _getSize
     };
 };
 

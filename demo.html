@@ -16,9 +16,12 @@
         <div id="b" style="margin: auto; width: 600px;"></div>
 
         <script>
+            var geometry = {segmentWidth: 70, segmentHeight: 120};
             var a = document.getElementById('a');
-            var group = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Alpha});
+            var group = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Alpha, geometry: geometry});
             group.setText('YES WE');
+            a.style.width = group.getSize().width;
+            a.style.height = group.getSize().height;
 
             setTimeout(function () {
                 group.setText('HAVE');
@@ -37,7 +40,9 @@
             }, 20*1000);
 
             var b = document.getElementById('b');
-            var group2 = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Digits});
+            var group2 = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Digits, geometry: geometry});
+            b.style.width = group2.getSize().width;
+            b.style.height = group2.getSize().height;
             group2.setText('000000');
             setInterval(function () {
                 var d = new Date();
