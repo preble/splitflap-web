@@ -1,0 +1,57 @@
+<html>
+    <head>
+
+        <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <script src="splitflap.js"></script>
+        <style>
+            body {
+                background-color: rgb(36, 36, 36);
+            }
+        </style>
+
+    </head>
+    <body>
+
+        <div id="a" style="margin: auto; width: 450px;"></div>
+        <div id="b" style="margin: auto; width: 600px;"></div>
+
+        <script>
+            var a = document.getElementById('a');
+            var group = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Alpha});
+            group.setText('YES WE');
+
+            setTimeout(function () {
+                group.setText('HAVE');
+            }, 4*1000);
+            setTimeout(function () {
+                group.setText('HOT');
+            }, 8*1000);
+            setTimeout(function () {
+                group.setText('TATER');
+            }, 12*1000);
+            setTimeout(function () {
+                group.setText('TOTS');
+            }, 16*1000);
+            setTimeout(function () {
+                group.setText('');
+            }, 20*1000);
+
+            var b = document.getElementById('b');
+            var group2 = new SFD.SegmentGroup({numberOfSegments: 6, parent: a, flaps: SFD.Flaps.Digits});
+            group2.setText('000000');
+            setInterval(function () {
+                var d = new Date();
+                var h = d.getHours();
+                var m = d.getMinutes();
+                var s = d.getSeconds();
+                var str = [(h>9? '' : '0') + h,
+                            (m>9 ? '' : '0') + m,
+                            (s>9 ? '' : '0') + s
+                            ].join('');
+                group2.setText(str);
+            }, 1000);
+
+        </script>
+
+    </body>
+</html>
