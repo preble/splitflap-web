@@ -35,6 +35,8 @@ SFD.Segment = function(config) {
     /** bottom half of the display; stays still but content changes */
     var _halfBottom = document.createElement('div');
 
+    var _firstUpdate = true;
+
     function _init() {
         _target = _valueTop = _valueBottom = _config.flaps[0];
 
@@ -54,6 +56,9 @@ SFD.Segment = function(config) {
         _flap.appendChild(_flapContent);
         _config.parent.appendChild(_div);
 
+        _halfTop.innerText = _valueTop;
+        _halfBottom.innerText = _valueBottom;
+        _flapContent.innerText = _valueBottom;
         _update();
     }
 
@@ -92,9 +97,10 @@ SFD.Segment = function(config) {
     }
 
     function _update() {
-        if (_angle == 0.0 && _target == _valueTop) {
+        if (_angle == 0.0 && _target == _valueTop && !_firstUpdate) {
             return; // nothing to do; we are at rest
         }
+        _firstUpdate = false;
 
         _flapContent.style.lineHeight = '0px';
 
