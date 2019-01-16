@@ -181,10 +181,14 @@ SFD.SegmentGroup = function(config) {
     }
 
     function _setText(text) {
-		for( var j = 0; j < _config.numberOfSegments; j++ ) {
-            var ch = (j < text.length) ? text[j] : ' ';
-            _segments[ j ].setCharacter(ch);
-		}
+        if (_config.numberOfSegments == 1) {
+            _segments[0].setCharacter(text);
+        } else {
+            for( var j = 0; j < _config.numberOfSegments; j++ ) {
+                var ch = (j < text.length) ? text[j] : ' ';
+                _segments[ j ].setCharacter(ch);
+            }
+        }
     }
 
     function _update() {
