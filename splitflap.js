@@ -175,7 +175,12 @@ SFD.SegmentGroup = function(config) {
             _segments.push(segment);
         }
 
+        _div.className = 'sfd_segmentGroup';
         _config.parent.appendChild(_div);
+
+        var size = _getSize();
+        _div.style.width = size.width + 'px';
+        _div.style.height = size.height + 'px';
 
         _update();
     }
