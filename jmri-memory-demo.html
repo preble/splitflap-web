@@ -1,0 +1,189 @@
+<html>
+    <head>
+        <title>JMRI Split Flap Demo</title>
+
+        <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <script src="splitflap.js"></script>
+        <style>
+            body {
+                background-color: rgb(36, 36, 36);
+            }
+            #container {
+                margin-top: 2em;
+            }
+            .sfd_segmentGroup {
+                margin-top: 0.25em;
+                margin-bottom: 0.25em;
+            }
+            .inline {
+                display: inline-block;
+            }
+            #colon {
+                position: relative;
+                height: 100px;
+                bottom: 0.5em;
+            }
+
+            #dest .sfd_segment {
+                font-family: sans-serif;
+            }
+
+        </style>
+
+        <script src="/js/jquery-1.11.2.min.js"></script>
+        <script src="/js/jquery.websocket.js"></script>
+        <script src="/js/jquery.jmri.js"></script>
+        <script type="text/javascript">
+            var jmri = null;
+            $(document).ready(function() {
+                // once the document is loaded, assign a $.JMRI object to
+                // the jmri variable and overload two functions:
+                // open() and power(state)
+                jmri = $.JMRI({
+                    open: function() {
+                        jmri.getList("memory");
+                    },
+                    memory: function (name, value, data) {
+                        updateForMemory(name, value);
+                    },
+                    memories: function(data) {
+                        for( var j = 0; j < data.length; j++ ) {
+                            var d = data[j];
+                            var name = d.data.name;
+                            var value = d.data.value;
+                            updateForMemory(name, value);
+                        }
+                    }
+                });
+                // trigger the initial connection to the JMRI server; this
+                // method call ensures the jmri.open() method is called after
+                // a timeout to begin using fall back methods for monitoring
+                // items on the JMRI server even if a WebSocket connection
+                // cannot be established
+                jmri.connect();
+
+
+                var displays = [
+                    // {name: "IMCURRENTTIME", flaps: " :0123456789AMP"},
+                    {name: "IMDEMODEMO", flaps: SFD.Flaps.Alpha}
+                ];
+                var segmentGeometry = {segmentWidth: 70, segmentHeight: 120};
+                for( var j = 0; j < displays.length; j++ ) {
+                    var display = displays[j];
+
+                    var el = document.createElement('div');
+                    display.segmentGroup = new SFD.SegmentGroup({numberOfSegments: 16, parent: el, flaps: display.flaps, geometry: segmentGeometry});
+
+                    el.id = display.name;
+                    el.style.margin = 'auto';
+                    el.style.width = display.segmentGroup.getSize().width + 'px';
+                    document.querySelector('#container').appendChild(el);
+                }
+
+                var elHH1 = document.querySelector('#clock #hh1');
+                var elHH2 = document.querySelector('#clock #hh2');
+                var elMM1 = document.querySelector('#clock #mm1');
+                var elMM2 = document.querySelector('#clock #mm2');
+                var elAMPM = document.querySelector('#clock #ampm');
+                var segHH1 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elHH1, flaps: ' 1', geometry: segmentGeometry});
+                var segHH2 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elHH2, flaps: '0123456789', geometry: segmentGeometry});
+                var segMM1 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elMM1, flaps: '012345', geometry: segmentGeometry});
+                var segMM2 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elMM2, flaps: '0123456789', geometry: segmentGeometry});
+                var segAMPM = new SFD.SegmentGroup({numberOfSegments: 1, parent: elAMPM, flaps: ['AM', 'PM'], geometry: {segmentWidth: 140, segmentHeight: 120}});
+
+                function updateClock(value) {
+                    if (value.length == 7) { // '4:14 PM' or similar
+                        var hh1 = ' ';
+                        var hh2 = value[0];
+                        var mm1 = value[2];
+                        var mm2 = value[3];
+                        var ampm = value[5] + value[6];
+                    } else if (value.length == 8) { // '12:14 AM'
+                        var hh1 = value[0];
+                        var hh2 = value[1];
+                        var mm1 = value[3];
+                        var mm2 = value[4];
+                        var ampm = value[6] + value[7];
+                    } else {
+                        console.assert(value.length == 7 || value.length == 8, 'Bad time length');
+                    }
+                    segHH1.setText(hh1);
+                    segHH2.setText(hh2);
+                    segMM1.setText(mm1);
+                    segMM2.setText(mm2);
+                    segAMPM.setText(ampm);
+                }
+
+                var elTrack = document.querySelector('#track');
+                var elDest = document.querySelector('#dest');
+                var segTrack = new SFD.SegmentGroup({numberOfSegments: 2, parent: elTrack, flaps: ' 0123456789', geometry: segmentGeometry});
+                var cities = [
+                    'Atlanta',
+                    'Birmingham',
+                    'New Orleans',
+                    'Mobile',
+                    'New York',
+                    'Newark',
+                    'Philadelphia',
+                    'Baltimore',
+                    'Lynchburg',
+                    'High Point',
+                    'Spartanburg',
+                    'Gainesville',
+                    'Toccoa',
+                    'Washington'
+                ];
+                var cityFlaps = cities.slice(0); // copy array
+                cityFlaps.unshift(''); // insert blank at front
+                var segDest = new SFD.SegmentGroup({numberOfSegments: 1, parent: elDest, flaps: cityFlaps, geometry: {segmentWidth: 700, segmentHeight: 120}});
+
+                function randomCity() {
+                    var city = cities[Math.floor(Math.random()*cities.length)];
+                    segDest.setText(city);
+                    var t = (Math.floor(Math.random() * 19) + 1).toString();
+                    if (t.length == 1) { t = ' ' + t; };
+                    segTrack.setText(t);
+                }
+
+                setTimeout(randomCity, 2000);
+                setInterval(randomCity, 8000);
+
+
+                function updateForMemory(name, value) {
+                    // console.log(name, value);
+
+                    if (name == 'IMCURRENTTIME') {
+                        updateClock(value);
+                    }
+
+                    for( var j = 0; j < displays.length; j++ ) {
+                        var display = displays[j];
+                        if (display.name == name) {
+                            display.segmentGroup.setText(value.toUpperCase());
+                        }
+                    }
+                }
+
+
+            });
+
+
+        </script>
+
+
+    </head>
+    <body>
+
+        <div id="container"></div>
+
+        <div id="clock" style="font-size: 100px; color: white; width: 600px; margin: auto;">
+            <div id="hh1" class="inline"></div><div id="hh2" class="inline"></div><span id="colon" class="inline">:</span><div id="mm1" class="inline"></div><div id="mm2" class="inline"></div> <div id="ampm" class="inline"></div>
+        </div>
+
+        <div style="width: 900px; margin: auto;">
+            <div id="track" class="inline"></div>
+            <div id="dest" class="inline"></div>
+        </div>
+
+    </body>
+</html>
