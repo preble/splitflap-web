@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <title>JMRI Split Flap Demo</title>
+
+        <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <script src="splitflap.js"></script>
+        <style>
+            body {
+                background-color: rgb(36, 36, 36);
+            }
+            #container {
+                margin-top: 2em;
+            }
+            .sfd_segmentGroup {
+                margin-top: 0.25em;
+                margin-bottom: 0.25em;
+            }
+            .inline {
+                display: inline-block;
+            }
+            #colon {
+                position: relative;
+                height: 100px;
+                bottom: 0.6em;
+            }
+
+            #dest .sfd_segment {
+                font-family: sans-serif;
+            }
+
+            #error {
+                width: 600px;
+                margin: auto;
+                color: orange;
+                font-size: 30px;
+                font-family: sans-serif;
+            }
+
+        </style>
+
+        <script src="/js/jquery-1.11.2.min.js"></script>
+        <script src="/js/jquery.websocket.js"></script>
+        <script src="/js/jquery.jmri.js"></script>
+        <script type="text/javascript">
+            var jmri = null;
+            $(document).ready(function() {
+                // once the document is loaded, assign a $.JMRI object to
+                // the jmri variable and overload two functions:
+                // open() and power(state)
+                jmri = $.JMRI({
+                    open: function() {
+                        jmri.getMemory("IMCURRENTTIME");
+                    },
+                    error: function(error) {
+                        console.error('JMRI error', error);
+                        showError(error);
+                    },
+                    close: function () {
+                        showError('Connection closed');
+                    },
+                    willReconnect: function (attempt, delay) {
+                        showError('Will reconnect (' + attempt + ')');
+                    },
+                    memory: function (name, value, data) {
+                        if (name == 'IMCURRENTTIME') {
+                            showError(null);
+                            updateClock(value);
+                        }
+                    },
+                });
+                // trigger the initial connection to the JMRI server; this
+                // method call ensures the jmri.open() method is called after
+                // a timeout to begin using fall back methods for monitoring
+                // items on the JMRI server even if a WebSocket connection
+                // cannot be established
+                jmri.connect();
+
+                var segmentGeometry = {segmentWidth: 70, segmentHeight: 120};
+                var elHH1 = document.querySelector('#clock #hh1');
+                var elHH2 = document.querySelector('#clock #hh2');
+                var elMM1 = document.querySelector('#clock #mm1');
+                var elMM2 = document.querySelector('#clock #mm2');
+                var elAMPM = document.querySelector('#clock #ampm');
+                var segHH1 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elHH1, flaps: ' 1', geometry: segmentGeometry});
+                var segHH2 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elHH2, flaps: '0123456789', geometry: segmentGeometry});
+                var segMM1 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elMM1, flaps: '012345', geometry: segmentGeometry});
+                var segMM2 = new SFD.SegmentGroup({numberOfSegments: 1, parent: elMM2, flaps: '0123456789', geometry: segmentGeometry});
+                var segAMPM = new SFD.SegmentGroup({numberOfSegments: 1, parent: elAMPM, flaps: ['AM', 'PM'], geometry: {segmentWidth: 140, segmentHeight: 120}});
+
+                function updateClock(value) {
+                    if (value.length == 7) { // '4:14 PM' or similar
+                        var hh1 = ' ';
+                        var hh2 = value[0];
+                        var mm1 = value[2];
+                        var mm2 = value[3];
+                        var ampm = value[5] + value[6];
+                    } else if (value.length == 8) { // '12:14 AM'
+                        var hh1 = value[0];
+                        var hh2 = value[1];
+                        var mm1 = value[3];
+                        var mm2 = value[4];
+                        var ampm = value[6] + value[7];
+                    } else {
+                        console.assert(value.length == 7 || value.length == 8, 'Bad time length');
+                    }
+                    segHH1.setText(hh1);
+                    segHH2.setText(hh2);
+                    segMM1.setText(mm1);
+                    segMM2.setText(mm2);
+                    segAMPM.setText(ampm);
+                }
+
+                function showError(error) {
+                    document.querySelector('#error').innerText = error;
+                    document.querySelector('#colon').innerHTML = (error == null) ? ':' : '&middot;';
+                }
+
+            }); // document ready
+        </script>
+
+
+    </head>
+    <body>
+
+        <div id="clock" style="font-size: 100px; color: white; width: 600px; margin: auto; margin-top: 1em;">
+            <div id="hh1" class="inline"></div><div id="hh2" class="inline"></div><span id="colon" class="inline">:</span><div id="mm1" class="inline"></div><div id="mm2" class="inline"></div> <div id="ampm" class="inline"></div>
+        </div>
+        <div id="error"></div>
+
+    </body>
+</html>
