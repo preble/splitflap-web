@@ -74,8 +74,8 @@ SFD.Segment = function(config) {
 
     function _setCharacter(ch) {
         if (!_characterIsFlap(ch)) {
-            console.error('Ignoring character not found in flaps: ' + ch);
-            return;
+            console.info('Adding character: '+ch);
+            _config.flaps.push(ch);
         }
         _target = ch;
     }

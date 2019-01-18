@@ -133,9 +133,8 @@
                     'Toccoa',
                     'Washington'
                 ];
-                var cityFlaps = cities.slice(0); // copy array
-                cityFlaps.unshift(''); // insert blank at front
-                var segDest = new SFD.SegmentGroup({numberOfSegments: 1, parent: elDest, flaps: cityFlaps, geometry: {segmentWidth: 700, segmentHeight: 120}});
+                // We don't pass city names into the segment group; they will be added as new flaps when they are first requested via setText.
+                var segDest = new SFD.SegmentGroup({numberOfSegments: 1, parent: elDest, flaps: [''], geometry: {segmentWidth: 700, segmentHeight: 120}});
 
                 function randomCity() {
                     var city = cities[Math.floor(Math.random()*cities.length)];
