@@ -12,6 +12,8 @@ var SFD = SFD || {};
 SFD.Segment = function(config) {
 
     var _config = config;
+    _config.flaps = Array.isArray(_config.flaps) ? _config.flaps : _config.flaps.split('');
+
     /** letter we are 'seeking' */
     var _target = null;
     /** current angle of the flap */
