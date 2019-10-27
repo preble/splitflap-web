@@ -105,7 +105,7 @@
                     memory: function (name, value, data) {
                         // console.log(name, value, data);
                         var segment = segments[name];
-                        if (segment) {
+                        if (segment && value) {
                             segment.setText(value.toUpperCase());
                         }
                     },
@@ -131,7 +131,7 @@
                 jmri.connect();
 
                 function showError(error) {
-                    document.querySelector('#error').innerText = error;
+                    document.querySelector('#error').innerText = JSON.stringify(error);
                 }
 
             }); // document ready
@@ -140,6 +140,8 @@
 
     </head>
     <body>
+        
+        <div id="error"></div>
 
         <table>
             <tr>
