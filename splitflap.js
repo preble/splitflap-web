@@ -45,6 +45,7 @@ SFD.Segment = function(config) {
         _div.className = 'sfd_segment';
         _div.style.width = _config.size.width + 'px';
         _div.style.height = _config.size.height + 'px';
+        _div.style.fontSize = Math.round(_config.size.height * 0.83) + 'px'; // 120px -> 100px
 
         _flap.className = 'sfd_segment_flap';
         _halfTop.className = 'sfd_half_top';
