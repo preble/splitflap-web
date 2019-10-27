@@ -1,0 +1,174 @@
+<html>
+    <head>
+        <title>FRR4 Staging</title>
+
+        <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <script src="splitflap.js"></script>
+        <style>
+            body {
+                background-color: rgb(36, 36, 36);
+            }
+            #container {
+                margin-top: 2em;
+            }
+            .sfd_segmentGroup {
+                margin-top: 0.25em;
+                margin-bottom: 0.25em;
+            }
+            .inline {
+                display: inline-block;
+            }
+
+            #dest .sfd_segment {
+                font-family: sans-serif;
+            }
+
+            #error {
+                width: 600px;
+                margin: auto;
+                color: orange;
+                font-size: 30px;
+                font-family: sans-serif;
+            }
+
+            table {
+                margin-left: 50px;
+            }
+            h1 {
+                font-family: sans-serif;
+                color: white;
+                margin-top: 50px;
+            }
+            .signal {
+                display: inline-block;
+                width: 100px;
+                height: 100px;
+                margin: 30px;
+                border-width: 20px;
+                border-color: black;
+                border-radius: 50%;
+            }
+            .display {
+            }
+
+        </style>
+
+        <script src="/js/jquery-1.11.2.min.js"></script>
+        <script src="/js/jquery.websocket.js"></script>
+        <script src="/js/jquery.jmri.js"></script>
+        <script type="text/javascript">
+
+            var jmri = null;
+            $(document).ready(function() {
+                var elSignalA = document.querySelector('#signal_a');
+                var elSignalB = document.querySelector('#signal_b');
+
+                var segmentGeometry = {segmentWidth: 70, segmentHeight: 120};
+                var elDisplayA = document.querySelector('#display_a');
+                var elDisplayB = document.querySelector('#display_b');
+                var flaps = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-*<>';
+                var segA = new SFD.SegmentGroup({numberOfSegments: 6, parent: elDisplayA, flaps: flaps, geometry: segmentGeometry});
+                var segB = new SFD.SegmentGroup({numberOfSegments: 6, parent: elDisplayB, flaps: flaps, geometry: segmentGeometry});
+
+                var segments = {
+                    'IM:AUTO:0049': segA, // PORTOLA Departure
+                    'IM:AUTO:0050': segB, // WARM SPRINGS Departure
+                };
+                var signalElements = {
+                    'IH32': elSignalA, // W PORTOLA WB2
+                    'IH100': elSignalB // WARM SPRINGS EB1
+                };
+
+                // once the document is loaded, assign a $.JMRI object to
+                // the jmri variable and overload two functions:
+                // open() and power(state)
+                jmri = $.JMRI({
+                    open: function() {
+                        // Subscribe to memory and signal heads:
+                        Object.keys(segments).forEach(name => {
+                            jmri.getMemory(name);
+                        });
+                        Object.keys(signalElements).forEach(name => {
+                            jmri.getSignalHead(name);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('JMRI error', error);
+                        showError(error);
+                    },
+                    close: function () {
+                        showError('Connection closed');
+                    },
+                    willReconnect: function (attempt, delay) {
+                        showError('Will reconnect (' + attempt + ')');
+                    },
+                    memory: function (name, value, data) {
+                        // console.log(name, value, data);
+                        var segment = segments[name];
+                        if (segment) {
+                            segment.setText(value.toUpperCase());
+                        }
+                    },
+                    signalHead: function (name, value, data) {
+                        console.log(name, value, data);
+                        var element = signalElements[name];
+                        if (element) {
+                            var colors = {
+                                1: 'hsl(10, 100%, 50%)',
+                                4: 'hsl(50, 100%, 60%)', // yellow
+                                16: 'hsl(130, 100%, 50%)'
+                            };
+                            var color = colors[value] || '#555';
+                            element.style.backgroundColor = color;
+                        }
+                    }
+                });
+                // trigger the initial connection to the JMRI server; this
+                // method call ensures the jmri.open() method is called after
+                // a timeout to begin using fall back methods for monitoring
+                // items on the JMRI server even if a WebSocket connection
+                // cannot be established
+                jmri.connect();
+
+                function showError(error) {
+                    document.querySelector('#error').innerText = error;
+                }
+
+            }); // document ready
+        </script>
+
+
+    </head>
+    <body>
+
+        <table>
+            <tr>
+                <td colspan=2>
+                    <h1>Portola Departures</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="signal_a" class="signal"></div>
+                </td>
+                <td>
+                    <div id="display_a" class="display"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                    <h1>Warm Springs Departures</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="signal_b" class="signal"></div>
+                </td>
+                <td>
+                    <div id="display_b" class="display"></div>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html>
