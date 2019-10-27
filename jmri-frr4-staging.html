@@ -3,55 +3,8 @@
         <title>FRR4 Staging</title>
 
         <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <link href='jmri-frr4.css' rel='stylesheet' type='text/css'>
         <script src="splitflap.js"></script>
-        <style>
-            body {
-                background-color: rgb(36, 36, 36);
-            }
-            #container {
-                margin-top: 2em;
-            }
-            .sfd_segmentGroup {
-                margin-top: 0.25em;
-                margin-bottom: 0.25em;
-            }
-            .inline {
-                display: inline-block;
-            }
-
-            #dest .sfd_segment {
-                font-family: sans-serif;
-            }
-
-            #error {
-                width: 600px;
-                margin: auto;
-                color: orange;
-                font-size: 30px;
-                font-family: sans-serif;
-            }
-
-            table {
-                margin-left: 50px;
-            }
-            h1 {
-                font-family: sans-serif;
-                color: white;
-                margin-top: 50px;
-            }
-            .signal {
-                display: inline-block;
-                width: 100px;
-                height: 100px;
-                margin: 30px;
-                border-width: 20px;
-                border-color: black;
-                border-radius: 50%;
-            }
-            .display {
-            }
-
-        </style>
 
         <script src="/js/jquery-1.11.2.min.js"></script>
         <script src="/js/jquery.websocket.js"></script>
@@ -70,9 +23,18 @@
                 var segA = new SFD.SegmentGroup({numberOfSegments: 6, parent: elDisplayA, flaps: flaps, geometry: segmentGeometry});
                 var segB = new SFD.SegmentGroup({numberOfSegments: 6, parent: elDisplayB, flaps: flaps, geometry: segmentGeometry});
 
+                var mphFlaps = ' -0123456789';
+                var segmentMphGeometry = {segmentWidth: 35, segmentHeight: 60};
+                var elMphA = document.querySelector('#mph_a');
+                var elMphB = document.querySelector('#mph_b');
+                var segMphA = new SFD.SegmentGroup({numberOfSegments: 2, parent: elMphA, flaps: mphFlaps, geometry: segmentMphGeometry});
+                var segMphB = new SFD.SegmentGroup({numberOfSegments: 2, parent: elMphB, flaps: mphFlaps, geometry: segmentMphGeometry});
+
                 var segments = {
                     'IM:AUTO:0049': segA, // PORTOLA Departure
                     'IM:AUTO:0050': segB, // WARM SPRINGS Departure
+                    'IMSPEED1': segMphA,
+                    'IMSPEED2': segMphB,
                 };
                 var signalElements = {
                     'IH32': elSignalA, // W PORTOLA WB2
@@ -145,7 +107,7 @@
 
         <table>
             <tr>
-                <td colspan=2>
+                <td colspan=3>
                     <h1>Portola Departures</h1>
                 </td>
             </tr>
@@ -156,9 +118,13 @@
                 <td>
                     <div id="display_a" class="display"></div>
                 </td>
+                <td>
+                    <div id="mph_a" class="display mph_display"></div>
+                    <div class="mph">MPH</div>
+                </td>
             </tr>
             <tr>
-                <td colspan=2>
+                <td colspan=3>
                     <h1>Warm Springs Departures</h1>
                 </td>
             </tr>
@@ -168,6 +134,10 @@
                 </td>
                 <td>
                     <div id="display_b" class="display"></div>
+                </td>
+                <td>
+                    <div id="mph_b" class="display mph_display"></div>
+                    <div class="mph">MPH</div>
                 </td>
             </tr>
         </table>

@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <title>FRR4 Staging</title>
+
+        <link href='splitflap.css' rel='stylesheet' type='text/css'>
+        <link href='jmri-frr4.css' rel='stylesheet' type='text/css'>
+        <script src="splitflap.js"></script>
+
+        <script src="/js/jquery-1.11.2.min.js"></script>
+        <script src="/js/jquery.websocket.js"></script>
+        <script src="/js/jquery.jmri.js"></script>
+        <script type="text/javascript">
+
+            var jmri = null;
+            $(document).ready(function() {
+                var query = window.location.search.substring(1);
+                
+                var mphFlaps = ' -0123456789';
+                var segmentMphGeometry = {segmentWidth: 35, segmentHeight: 60};
+                var elMphA = document.querySelector('#mph_a');
+                var segMphA = new SFD.SegmentGroup({numberOfSegments: 2, parent: elMphA, flaps: mphFlaps, geometry: segmentMphGeometry});
+                
+                var segments = {};
+                segments[query] = segMphA;
+
+                // once the document is loaded, assign a $.JMRI object to
+                // the jmri variable and overload two functions:
+                // open() and power(state)
+                jmri = $.JMRI({
+                    open: function() {
+                        // Subscribe to memory and signal heads:
+                        Object.keys(segments).forEach(name => {
+                            jmri.getMemory(name);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('JMRI error', error);
+                        showError(error);
+                    },
+                    close: function () {
+                        showError('Connection closed');
+                    },
+                    willReconnect: function (attempt, delay) {
+                        showError('Will reconnect (' + attempt + ')');
+                    },
+                    memory: function (name, value, data) {
+                        // console.log(name, value, data);
+                        var segment = segments[name];
+                        if (segment && value) {
+                            segment.setText(value.toUpperCase());
+                        }
+                    },
+                });
+                // trigger the initial connection to the JMRI server; this
+                // method call ensures the jmri.open() method is called after
+                // a timeout to begin using fall back methods for monitoring
+                // items on the JMRI server even if a WebSocket connection
+                // cannot be established
+                jmri.connect();
+
+                function showError(error) {
+                    document.querySelector('#error').innerText = JSON.stringify(error);
+                }
+
+            }); // document ready
+        </script>
+
+
+    </head>
+    <body>
+        
+        <div id="error"></div>
+
+<div style="width: 120; text-align: center; margin: 80px">
+        <div id="mph_a" class="display mph_display"></div>
+        <div class="mph">MPH</div>
+</div>
+    </body>
+</html>

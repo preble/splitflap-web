@@ -1,0 +1,54 @@
+body {
+    background-color: rgb(36, 36, 36);
+    color: white;
+}
+#container {
+    margin-top: 2em;
+}
+.sfd_segmentGroup {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+.inline {
+    display: inline-block;
+}
+
+#dest .sfd_segment {
+    font-family: sans-serif;
+}
+
+#error {
+    width: 600px;
+    margin: auto;
+    color: orange;
+    font-size: 30px;
+    font-family: sans-serif;
+}
+
+table {
+    margin-left: 50px;
+}
+h1 {
+    font-family: sans-serif;
+    color: white;
+    margin-top: 50px;
+}
+.signal {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    margin: 30px;
+    border-width: 20px;
+    border-color: black;
+    border-radius: 50%;
+}
+.display {
+}
+
+.mph {
+    font-family: sans-serif;
+    text-align: center;
+}
+.mph_display {
+    margin: 0 20px 0 20px;
+}
